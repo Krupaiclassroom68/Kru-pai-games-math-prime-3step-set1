@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Kru Pai Classroom — Prime Quest (สามด่าน)</title>
+<style>
+  :root{
+    --bg1:#f0f9ff; --bg2:#fff7ed;
+    --ink:#0b2545; --muted:#5a78a3;
+    --primary:#2563eb; --accent:#f97316;
+    --good:#15803d; --bad:#b91c1c; --card:#ffffff;
+    --shadow:0 10px 28px rgba(37,99,235,.15);
+    --radius:18px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Segoe UI',system-ui,-apple-system,Arial,sans-serif;color:var(--ink);
+       background:linear-gradient(180deg,var(--bg1),var(--bg2) 65%);min-height:100vh}
+  header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;
+         position:sticky;top:0;z-index:5;background:rgba(240,249,255,.75);
+         backdrop-filter:saturate(1.2) blur(6px);border-bottom:1px solid #cfe1ff}
+  .brand{display:flex;gap:10px;align-items:center;font-weight:800;color:var(--primary)}
+  .brand .mark{width:40px;height:40px;border-radius:12px;background:var(--primary);
+               display:grid;place-items:center;color:#fff;box-shadow:var(--shadow);font-weight:900}
+  .container{max-width:1024px;margin:24px auto;padding:0 16px 70px}
+  .card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px;margin:16px 0}
+  h1,h2,h3{margin:8px 0 14px} h1{font-size:clamp(24px,3vw,34px);color:var(--primary)}
+  h2{font-size:clamp(20px,2.2vw,26px);color:var(--accent)} p{line-height:1.6}
+  .btn{display:inline-flex;align-items:center;gap:8px;padding:12px 18px;border-radius:14px;border:0;cursor:pointer;
+       background:var(--primary);color:#fff;font-weight:700;box-shadow:0 8px 18px rgba(37,99,235,.18)}
+  .btn:active{transform:translateY(1px)} .btn.ghost{background:#fff;color:var(--primary);border:2px solid #cfe1ff}
+  .btn.secondary{background:var(--accent)} .btn.good{background:var(--good)} .btn.danger{background:var(--bad)}
+  .grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+  @media(min-width:860px){.grid{grid-template-columns:repeat(10,1fr)}}
+  .num{user-select:none;border:2px solid #dbeafe;border-radius:12px;padding:12px;text-align:center;font-weight:800;
+       background:#fff;cursor:pointer;transition:.08s} .num.sel{background:#dbeafe;border-color:#93c5fd}
+  .toolbar{display:flex;flex-wrap:wrap;gap:10px}
+  .hidden{display:none !important}
+  .note{color:var(--muted);font-size:14px}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .primekeys{display:flex;gap:8px;flex-wrap:wrap}
+  .key{padding:8px 12px;border:2px solid #fed7aa;border-radius:999px;background:#fff7ed;font-weight:800;color:#9a3412;cursor:pointer}
+  .slot{min-width:44px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;padding:8px 12px;border:2px dashed #fca05d;border-radius:12px;background:#fff}
+  .slot.fill{border-style:solid;background:#fffbeb}
+  .qbox{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .score{display:flex;align-items:center;justify-content:space-between;background:#eef2ff;border:1px solid #c7d2fe;color:#3730a3;padding:10px;border-radius:12px}
+  .pill{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:2px solid #cfe1ff;color:#2563eb;font-weight:800}
+  .equation{font-size:22px;font-weight:800;color:#9a3412}
+  .factors{font-size:22px}
+  .times{margin:0 6px}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <div class="mark">KP</div>
+    <div>Prime Quest<br><span class="note">สามด่าน: จำนวนเฉพาะ → แยกตัวประกอบ → ห.ร.ม./ค.ร.น.</span></div>
+  </div>
+  <div class="pill">ไม่มีเสียง • เล่นทีละด่าน</div>
+</header>
+
+<div class="container">
+  <section id="home" class="card">
+    <h1>🏁 แผนที่ด่าน</h1>
+    <p>ผ่านด่าน 1 เพื่อปลดล็อกด่าน 2 และผ่านด่าน 2 เพื่อปลดล็อกด่าน 3</p>
+    <div class="toolbar">
+      <button class="btn" onclick="startStage1()">🔷 ด่านที่ 1: เลือกจำนวนเฉพาะ 1–50</button>
+      <button id="btnStage2" class="btn ghost" onclick="startStage2()" disabled>🧩 ด่านที่ 2: แยกตัวประกอบ (10 ข้อ)</button>
+      <button id="btnStage3" class="btn ghost" onclick="startStage3()" disabled>⚔️ ด่านที่ 3: ห.ร.ม./ค.ร.น. (10 ข้อ)</button>
+    </div>
+  </section>
+
+  <section id="stage1" class="card hidden">
+    <h2>🔷 ด่านที่ 1: เลือก “จำนวนเฉพาะ” ให้ครบ (1–50)</h2>
+    <p class="note">จำนวนเฉพาะ = ตัวที่มีตัวหารบวกได้เพียง 1 และตัวมันเอง (1 ไม่ใช่จำนวนเฉพาะ)</p>
+    <div id="grid1" class="grid"></div>
+    <div class="toolbar">
+      <button class="btn secondary" onclick="checkStage1()">✅ ตรวจสอบ</button>
+      <button class="btn ghost" onclick="resetStage1()">🔁 เริ่มใหม่</button>
+      <button class="btn" onclick="backHome()">🏠 กลับแผนที่</button>
+    </div>
+    <p id="msg1" class="note"></p>
+  </section>
+
+  <section id="stage2" class="card hidden">
+    <h2>🧩 ด่านที่ 2: แยกตัวประกอบ (10 ข้อ)</h2>
+    <p class="note">กรุณา<strong>เรียงตัวประกอบจากน้อยไปมาก</strong> และใส่เครื่องหมายคูณอัตโนมัติเป็นสัญลักษณ์ “×”</p>
+    <div class="score"><div>ข้อ <b id="s2idx">1</b>/10</div><div class="equation"><span id="s2targetL">-</span> = <span id="s2equation">?</span></div></div>
+    <div class="row"><div class="primekeys" id="s2keys"></div></div>
+    <div class="card">
+      <div class="qbox">
+        <span class="note">ตัวประกอบที่เลือก (เรียงจากน้อยไปมาก):</span>
+        <div id="s2slots"></div>
+      </div>
+    </div>
+    <div class="toolbar">
+      <button class="btn secondary" onclick="s2Check()">✅ ตรวจ</button>
+      <button class="btn ghost" onclick="s2Undo()">↩️ ลบตัวสุดท้าย</button>
+      <button class="btn ghost" onclick="s2Clear()">🧽 ล้างทั้งหมด</button>
+      <button class="btn" onclick="backHome()">🏠 กลับแผนที่</button>
+    </div>
+    <p id="s2msg" class="note"></p>
+  </section>
+
+  <section id="stage3" class="card hidden">
+    <h2>⚔️ ด่านที่ 3: หาค่า ห.ร.ม. (GCD) / ค.ร.น. (LCM) — 10 ข้อ</h2>
+    <div class="score"><div>ข้อ <b id="s3idx">1</b>/10</div><div><span id="s3type">-</span> ของ <b id="s3a">-</b> และ <b id="s3b">-</b></div></div>
+    <div class="row"><label>คำตอบ: <input id="s3ans" type="number" min="1" style="padding:10px;border:2px solid #cfe1ff;border-radius:12px;width:160px"></label></div>
+    <div class="toolbar">
+      <button class="btn secondary" onclick="s3Check()">✅ ตรวจ</button>
+      <button class="btn ghost" onclick="s3Skip()">⏭️ ข้อถัดไป</button>
+      <button class="btn" onclick="backHome()">🏠 กลับแผนที่</button>
+    </div>
+    <p id="s3msg" class="note"></p>
+  </section>
+
+  <section id="finish" class="card hidden">
+    <h2>🏆 เคลียร์เกมสำเร็จ!</h2>
+    <p>เก่งมาก ๆ ผ่านครบทั้ง 3 ด่านแล้ว 🎉</p>
+    <div class="toolbar">
+      <button class="btn" onclick="restartAll()">🔁 เริ่มเล่นใหม่</button>
+      <button class="btn ghost" onclick="backHome()">🏠 กลับแผนที่</button>
+    </div>
+  </section>
+</div>
+
+<script>
+function $(id){return document.getElementById(id)}
+function show(id){$(id).classList.remove('hidden')}
+function hide(id){$(id).classList.add('hidden')}
+function switchTo(ids){['home','stage1','stage2','stage3','finish'].forEach(hide); ids.forEach(show)}
+function backHome(){switchTo(['home'])}
+
+const PRIMES_1_50 = [2,3,5,7,11,13,17,19,23,29,31,37,41,43,47];
+let s1Selected = new Set();
+
+function startStage1(){
+  s1Selected = new Set();
+  const g = $('grid1'); g.innerHTML='';
+  for(let n=1;n<=50;n++){
+    const d=document.createElement('div'); d.className='num'; d.textContent=n; d.dataset.n=n;
+    d.addEventListener('click',()=>{ d.classList.toggle('sel'); const v=+d.dataset.n; if(d.classList.contains('sel')) s1Selected.add(v); else s1Selected.delete(v); });
+    g.appendChild(d);
+  }
+  $('msg1').textContent='เลือกเฉพาะจำนวนเฉพาะให้ครบ แล้วกดตรวจสอบ';
+  switchTo(['stage1']);
+}
+function resetStage1(){ startStage1(); }
+function checkStage1(){
+  const chosen = Array.from(s1Selected).sort((a,b)=>a-b);
+  const want = PRIMES_1_50.slice();
+  const ok = chosen.length===want.length && chosen.every((v,i)=>v===want[i]);
+  if(ok){
+    $('msg1').innerHTML='✅ ถูกต้อง! ปลดล็อกด่านที่ 2 แล้ว';
+    const b2=$('btnStage2'); b2.disabled=false; b2.classList.remove('ghost'); b2.classList.add('secondary');
+    setTimeout(()=>{ startStage2(); }, 600);
+  }else{
+    $('msg1').innerHTML='❌ ยังไม่ถูกต้อง (อาจเลือกไม่ครบ หรือมีตัวที่ไม่ใช่จำนวนเฉพาะ) — ลองใหม่อีกครั้งนะ';
+  }
+}
+
+const S2_PRIMES=[2,3,5,7,11,13,17,19];
+let s2Index=0; let s2Numbers=[]; let s2AnswerBag=[];
+function makeS2Set(){ const base=[20,18,45,50,72,30,84,36,63,40]; return base.sort(()=>Math.random()-0.5); }
+function factorize(n){ const bag=[]; let x=n; for(const p of S2_PRIMES){ while(x%p===0){ bag.push(p); x/=p; } } if(x!==1){ bag.push(x); } return bag.sort((a,b)=>a-b); }
+
+function startStage2(){ s2Numbers=makeS2Set(); s2Index=0; s2AnswerBag=[]; $('btnStage2').disabled=false; renderS2(); switchTo(['stage2']); }
+function renderS2(){
+  const target=s2Numbers[s2Index];
+  $('s2idx').textContent=(s2Index+1);
+  $('s2targetL').textContent=target;
+  $('s2msg').textContent='กดจำนวนเฉพาะด้านล่างเพื่อสร้างตัวประกอบ แล้วจัดเรียงจากน้อยไปมาก';
+  const keys=$('s2keys'); keys.innerHTML='';
+  S2_PRIMES.forEach(p=>{ const b=document.createElement('button'); b.className='key'; b.textContent=p; b.addEventListener('click',()=>{ s2AnswerBag.push(p); updateSlots(target); }); keys.appendChild(b); });
+  updateSlots(target);
+}
+
+function buildTimesString(arr){
+  if(arr.length===0) return '?';
+  return arr.join(' × ');
+}
+
+function updateSlots(target){
+  // Ensure equation display and chips
+  const wrap=$('s2slots'); wrap.innerHTML='';
+  if(s2AnswerBag.length===0){
+    const stub=document.createElement('span'); stub.className='note'; stub.textContent='(ยังไม่ได้เลือก)'; wrap.appendChild(stub);
+  }else{
+    s2AnswerBag.forEach(v=>{ const sp=document.createElement('span'); sp.className='slot fill'; sp.textContent=v; wrap.appendChild(sp); });
+  }
+  $('s2equation').textContent = buildTimesString(s2AnswerBag);
+}
+
+function s2Undo(){ s2AnswerBag.pop(); updateSlots(s2Numbers[s2Index]); }
+function s2Clear(){ s2AnswerBag=[]; updateSlots(s2Numbers[s2Index]); }
+
+function s2Check(){
+  const target=s2Numbers[s2Index];
+  const need=factorize(target);                 // sorted ascending
+  const got=s2AnswerBag.slice();                // preserve order to check ascending
+  const gotSorted = got.slice().sort((a,b)=>a-b);
+  const isAscending = got.every((v,i)=> i===0 || got[i-1] <= v);
+  const sameAsNeed = (need.length===got.length) && need.every((v,i)=>v===gotSorted[i]);
+
+  if(!sameAsNeed){
+    $('s2msg').textContent='❌ ยังไม่ใช่ตัวประกอบที่ถูกต้อง ลองใหม่อีกครั้ง';
+    return;
+  }
+  if(!isAscending){
+    $('s2msg').textContent='ℹ️ ตัวประกอบถูกต้อง แต่ยังไม่เรียงจากน้อยไปมาก — กรุณาเรียงใหม่';
+    return;
+  }
+  $('s2msg').textContent='✅ ถูกต้อง! ไปข้อถัดไป';
+  s2Index++;
+  if(s2Index>=s2Numbers.length){
+    const b3=$('btnStage3'); b3.disabled=false; b3.classList.remove('ghost'); b3.classList.add('secondary');
+    setTimeout(()=>{ startStage3(); }, 600);
+  }else{
+    s2AnswerBag=[]; renderS2();
+  }
+}
+
+let s3Index=0; let s3Items=[]; let s3Expect=0; let s3Mode='GCD';
+function gcd(a,b){ while(b){ [a,b]=[b,a%b]; } return a; }
+function lcm(a,b){ return a/gcd(a,b)*b; }
+function makeS3Set(){ const pool=[[12,18,'GCD'],[6,8,'LCM'],[9,15,'GCD'],[4,10,'LCM'],[8,12,'GCD'],[5,12,'LCM'],[14,21,'GCD'],[7,9,'LCM'],[16,24,'GCD'],[9,12,'LCM']]; return pool.sort(()=>Math.random()-0.5); }
+function startStage3(){ s3Index=0; s3Items=makeS3Set(); renderS3(); switchTo(['stage3']); }
+function renderS3(){ const [a,b,mode]=s3Items[s3Index]; s3Mode=mode; $('s3idx').textContent=s3Index+1; $('s3a').textContent=a; $('s3b').textContent=b; $('s3type').textContent=(mode==='GCD'?'ห.ร.ม. (GCD)':'ค.ร.น. (LCM)'); $('s3ans').value=''; $('s3msg').textContent=''; s3Expect=(mode==='GCD'?gcd(a,b):lcm(a,b)); }
+function s3Check(){ const raw=$('s3ans').value; const val = Number((raw||'').trim()); if(!val){ $('s3msg').textContent='พิมพ์คำตอบเป็นจำนวนเต็มบวก'; return; } if(val===s3Expect){ $('s3msg').textContent='✅ ถูกต้อง!'; s3Next(); } else { $('s3msg').textContent='❌ ยังไม่ถูก ลองใหม่ หรือกด ข้อถัดไป'; } }
+function s3Skip(){ s3Next(); }
+function s3Next(){ s3Index++; if(s3Index>=s3Items.length){ switchTo(['finish']); } else { renderS3(); } }
+function restartAll(){ const b2=$('btnStage2'); b2.disabled=true; b2.classList.add('ghost'); b2.classList.remove('secondary'); const b3=$('btnStage3'); b3.disabled=true; b3.classList.add('ghost'); b3.classList.remove('secondary'); switchTo(['home']); }
+restartAll();
+</script>
+</body>
+</html>
